@@ -15,8 +15,9 @@ WORKDIR /app
 ENV NODE_ENV=production
 COPY package*.json ./
 COPY --from=deps /app/node_modules ./node_modules
+COPY --from=build /app/node_modules/.prisma ./node_modules/.prisma
 COPY --from=build /app/dist ./dist
 COPY --from=build /app/prisma ./prisma
 COPY proto ./proto
 EXPOSE 3002 50051
-CMD ["node", "dist/main.js"]
+CMD ["node", "dist/src/main.js"]
