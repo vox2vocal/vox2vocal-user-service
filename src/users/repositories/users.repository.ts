@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common'
+import { UserStatus } from '@prisma/client'
 
 import { PrismaService } from '../../prisma/prisma.service'
 
@@ -18,6 +19,27 @@ export class UsersRepository {
       include: {
         passwordCredential: true,
       },
+    })
+  }
+
+  async createPasswordUser(data: { email: string; displayName: string; passwordHash: string }) {
+    return this.prisma.$transaction(async (tx) => {
+      const user = await tx.user.create({
+        data: {
+          email: data.email,
+          displayName: data.displayName,
+          role: 'USER',
+          status: UserStatus.ACTIVE,
+          passwordCredential: {
+            create: {
+              passwordHash: data.passwordHash,
+              failedLoginCount: 0,
+            },
+          },
+        },
+      })
+
+      return user
     })
   }
 

@@ -3,6 +3,7 @@ import { CqrsModule } from '@nestjs/cqrs'
 
 import { CommandHandlers } from './commands'
 import { LoginPolicy } from './policies/login.policy'
+import { SignupPolicy } from './policies/signup.policy'
 import { QueryHandlers } from './queries'
 import { PasswordCredentialsRepository } from './repositories/password-credentials.repository'
 import { UsersRepository } from './repositories/users.repository'
@@ -19,6 +20,7 @@ import { UsersService } from './users.service'
     PasswordCredentialsRepository,
     PasswordHashService,
     LoginPolicy,
+    SignupPolicy,
     ...CommandHandlers,
     ...QueryHandlers,
   ],

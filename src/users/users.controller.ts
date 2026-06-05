@@ -3,6 +3,7 @@ import { CommandBus, QueryBus } from '@nestjs/cqrs'
 import { GrpcMethod } from '@nestjs/microservices'
 
 import { AuthenticateUserCommand } from './commands/authenticate-user.command'
+import { CreatePasswordUserCommand } from './commands/create-password-user.command'
 import { toUserResponse } from './mappers/user-response.mapper'
 import { GetUserQuery } from './queries/get-user.query'
 import { UserResponse, UserView } from './user.types'
@@ -15,6 +16,13 @@ type GetUserRequest = {
 type AuthenticateUserRequest = {
   email?: string
   password?: string
+}
+
+type CreatePasswordUserRequest = {
+  email?: string
+  password?: string
+  displayName?: string
+  display_name?: string
 }
 
 type AuthenticateUserResponse = {
@@ -34,6 +42,21 @@ export class UsersController {
     const user = await this.queryBus.execute<GetUserQuery, UserView>(new GetUserQuery(userId))
 
     return toUserResponse(user)
+  }
+
+  @GrpcMethod('UserService', 'CreatePasswordUser')
+  async createPasswordUser(request: CreatePasswordUserRequest): Promise<AuthenticateUserResponse> {
+    const user = await this.commandBus.execute<CreatePasswordUserCommand, UserView>(
+      new CreatePasswordUserCommand(
+        request.email ?? '',
+        request.password ?? '',
+        request.displayName ?? request.display_name ?? '',
+      ),
+    )
+
+    return {
+      user: toUserResponse(user),
+    }
   }
 
   @GrpcMethod('UserService', 'AuthenticateUser')
