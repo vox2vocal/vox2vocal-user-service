@@ -4,6 +4,7 @@ package user;
 
 service UserService {
   rpc GetUser(GetUserRequest) returns (UserResponse);
+  rpc AuthenticateUser(AuthenticateUserRequest) returns (AuthenticateUserResponse);
 }
 
 message GetUserRequest {
@@ -15,4 +16,13 @@ message UserResponse {
   string email = 2;
   string display_name = 3;
   string role = 4;
+}
+
+message AuthenticateUserRequest {
+  string email = 1;
+  string password = 2;
+}
+
+message AuthenticateUserResponse {
+  UserResponse user = 1;
 }
