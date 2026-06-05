@@ -2,6 +2,7 @@ import { CommandBus, QueryBus } from '@nestjs/cqrs'
 import { mock, MockProxy, mockReset } from 'jest-mock-extended'
 
 import { AuthenticateUserCommand } from '../../../../src/users/commands/authenticate-user.command'
+import { CreatePasswordUserCommand } from '../../../../src/users/commands/create-password-user.command'
 import { GetUserQuery } from '../../../../src/users/queries/get-user.query'
 import { UsersController } from '../../../../src/users/users.controller'
 import { createUserView } from '../../../helpers/users.fixtures'
@@ -83,5 +84,42 @@ describe('UsersController', () => {
     await controller.authenticateUser({})
 
     expect(commandBus.execute).toHaveBeenCalledWith(new AuthenticateUserCommand('', ''))
+  })
+
+  it('CreatePasswordUser gRPC 요청을 CreatePasswordUserCommand로 매핑한다', async () => {
+    const user = createUserView({
+      id: 'user-id',
+      email: 'user@example.com',
+      displayName: 'User',
+      role: 'USER',
+    })
+
+    commandBus.execute.mockResolvedValue(user)
+
+    await expect(
+      controller.createPasswordUser({
+        email: 'user@example.com',
+        password: 'password123',
+        display_name: 'User',
+      }),
+    ).resolves.toEqual({
+      user: {
+        id: 'user-id',
+        email: 'user@example.com',
+        display_name: 'User',
+        role: 'USER',
+      },
+    })
+    expect(commandBus.execute).toHaveBeenCalledWith(
+      new CreatePasswordUserCommand('user@example.com', 'password123', 'User'),
+    )
+  })
+
+  it('CreatePasswordUser 누락 필드는 빈 문자열로 매핑한다', async () => {
+    commandBus.execute.mockResolvedValue(createUserView())
+
+    await controller.createPasswordUser({})
+
+    expect(commandBus.execute).toHaveBeenCalledWith(new CreatePasswordUserCommand('', '', ''))
   })
 })

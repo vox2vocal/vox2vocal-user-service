@@ -9,14 +9,17 @@ describe('user.proto contract', () => {
     expect(proto).toContain('service UserService')
   })
 
-  it('declares GetUser and AuthenticateUser RPCs', () => {
+  it('GetUser, CreatePasswordUser, AuthenticateUser RPC를 선언한다', () => {
     expect(proto).toContain('rpc GetUser(GetUserRequest) returns (UserResponse);')
+    expect(proto).toContain(
+      'rpc CreatePasswordUser(CreatePasswordUserRequest) returns (CreatePasswordUserResponse);',
+    )
     expect(proto).toContain(
       'rpc AuthenticateUser(AuthenticateUserRequest) returns (AuthenticateUserResponse);',
     )
   })
 
-  it('declares the expected request and response fields', () => {
+  it('예상한 요청과 응답 필드를 선언한다', () => {
     expect(proto).toContain('string user_id = 1;')
     expect(proto).toContain('string display_name = 3;')
     expect(proto).toContain('string email = 1;')
