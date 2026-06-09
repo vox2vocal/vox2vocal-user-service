@@ -17,6 +17,15 @@ describe('user.proto contract', () => {
     expect(proto).toContain(
       'rpc AuthenticateUser(AuthenticateUserRequest) returns (AuthenticateUserResponse);',
     )
+    expect(proto).toContain(
+      'rpc RegisterRefreshToken(RegisterRefreshTokenRequest) returns (RefreshTokenResponse);',
+    )
+    expect(proto).toContain(
+      'rpc RotateRefreshToken(RotateRefreshTokenRequest) returns (RefreshTokenResponse);',
+    )
+    expect(proto).toContain(
+      'rpc RevokeRefreshToken(RevokeRefreshTokenRequest) returns (RefreshTokenResponse);',
+    )
   })
 
   it('예상한 요청과 응답 필드를 선언한다', () => {

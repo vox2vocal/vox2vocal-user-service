@@ -6,6 +6,9 @@ service UserService {
   rpc GetUser(GetUserRequest) returns (UserResponse);
   rpc CreatePasswordUser(CreatePasswordUserRequest) returns (CreatePasswordUserResponse);
   rpc AuthenticateUser(AuthenticateUserRequest) returns (AuthenticateUserResponse);
+  rpc RegisterRefreshToken(RegisterRefreshTokenRequest) returns (RefreshTokenResponse);
+  rpc RotateRefreshToken(RotateRefreshTokenRequest) returns (RefreshTokenResponse);
+  rpc RevokeRefreshToken(RevokeRefreshTokenRequest) returns (RefreshTokenResponse);
 }
 
 message GetUserRequest {
@@ -36,4 +39,37 @@ message AuthenticateUserRequest {
 
 message AuthenticateUserResponse {
   UserResponse user = 1;
+}
+
+message RegisterRefreshTokenRequest {
+  string user_id = 1;
+  string token_hash = 2;
+  string token_family = 3;
+  string expires_at = 4;
+  string device_id = 5;
+  string user_agent = 6;
+  string ip_address = 7;
+}
+
+message RotateRefreshTokenRequest {
+  string user_id = 1;
+  string token_hash = 2;
+  string next_token_hash = 3;
+  string token_family = 4;
+  string expires_at = 5;
+  string revoked_reason = 6;
+  string device_id = 7;
+  string user_agent = 8;
+  string ip_address = 9;
+}
+
+message RevokeRefreshTokenRequest {
+  string token_hash = 1;
+  string revoked_reason = 2;
+}
+
+message RefreshTokenResponse {
+  string status = 1;
+  string token_id = 2;
+  string token_family = 3;
 }

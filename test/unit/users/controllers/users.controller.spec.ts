@@ -4,6 +4,7 @@ import { mock, MockProxy, mockReset } from 'jest-mock-extended'
 import { AuthenticateUserCommand } from '../../../../src/users/commands/authenticate-user.command'
 import { CreatePasswordUserCommand } from '../../../../src/users/commands/create-password-user.command'
 import { GetUserQuery } from '../../../../src/users/queries/get-user.query'
+import { RefreshTokensRepository } from '../../../../src/users/repositories/refresh-tokens.repository'
 import { UsersController } from '../../../../src/users/users.controller'
 import { createUserView } from '../../../helpers/users.fixtures'
 
@@ -11,16 +12,19 @@ describe('UsersController', () => {
   let controller: UsersController
   let commandBus: MockProxy<CommandBus>
   let queryBus: MockProxy<QueryBus>
+  let refreshTokensRepository: MockProxy<RefreshTokensRepository>
 
   beforeEach(() => {
     commandBus = mock<CommandBus>()
     queryBus = mock<QueryBus>()
-    controller = new UsersController(commandBus, queryBus)
+    refreshTokensRepository = mock<RefreshTokensRepository>()
+    controller = new UsersController(commandBus, queryBus, refreshTokensRepository)
   })
 
   afterEach(() => {
     mockReset(commandBus)
     mockReset(queryBus)
+    mockReset(refreshTokensRepository)
   })
 
   it('maps GetUser gRPC snake_case request to GetUserQuery', async () => {
@@ -121,5 +125,78 @@ describe('UsersController', () => {
     await controller.createPasswordUser({})
 
     expect(commandBus.execute).toHaveBeenCalledWith(new CreatePasswordUserCommand('', '', ''))
+  })
+
+  it('RegisterRefreshToken gRPC 요청을 repository 입력으로 매핑한다', async () => {
+    refreshTokensRepository.register.mockResolvedValue({
+      status: 'OK',
+      tokenFamily: 'family-id',
+      tokenId: 'token-id',
+    })
+
+    await expect(
+      controller.registerRefreshToken({
+        expires_at: '2026-06-17T00:00:00.000Z',
+        token_family: 'family-id',
+        token_hash: 'hmac-hash',
+        user_id: 'user-id',
+      }),
+    ).resolves.toEqual({
+      status: 'OK',
+      token_family: 'family-id',
+      token_id: 'token-id',
+    })
+    expect(refreshTokensRepository.register).toHaveBeenCalledWith({
+      deviceId: undefined,
+      expiresAt: new Date('2026-06-17T00:00:00.000Z'),
+      ipAddress: undefined,
+      tokenFamily: 'family-id',
+      tokenHash: 'hmac-hash',
+      userAgent: undefined,
+      userId: 'user-id',
+    })
+  })
+
+  it('RotateRefreshToken gRPC 요청을 repository 입력으로 매핑한다', async () => {
+    refreshTokensRepository.rotate.mockResolvedValue({
+      status: 'TOKEN_REUSE_DETECTED',
+      tokenFamily: 'family-id',
+      tokenId: 'token-id',
+    })
+
+    await expect(
+      controller.rotateRefreshToken({
+        expires_at: '2026-06-17T00:00:00.000Z',
+        next_token_hash: 'next-hash',
+        token_family: 'family-id',
+        token_hash: 'old-hash',
+        user_id: 'user-id',
+      }),
+    ).resolves.toEqual({
+      status: 'TOKEN_REUSE_DETECTED',
+      token_family: 'family-id',
+      token_id: 'token-id',
+    })
+    expect(refreshTokensRepository.rotate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        nextTokenHash: 'next-hash',
+        tokenHash: 'old-hash',
+      }),
+    )
+  })
+
+  it('RevokeRefreshToken gRPC 요청을 repository 입력으로 매핑한다', async () => {
+    refreshTokensRepository.revokeByHash.mockResolvedValue({
+      status: 'OK',
+      tokenFamily: 'family-id',
+      tokenId: 'token-id',
+    })
+
+    await controller.revokeRefreshToken({
+      revoked_reason: 'logout',
+      token_hash: 'hmac-hash',
+    })
+
+    expect(refreshTokensRepository.revokeByHash).toHaveBeenCalledWith('hmac-hash', 'logout')
   })
 })
