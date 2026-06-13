@@ -38,6 +38,7 @@ describe('UsersController', () => {
     queryBus.execute.mockResolvedValue(user)
 
     await expect(controller.getUser({ user_id: 'user-id' })).resolves.toEqual({
+      displayName: 'User',
       id: 'user-id',
       email: 'user@example.com',
       display_name: 'User',
@@ -71,6 +72,7 @@ describe('UsersController', () => {
       }),
     ).resolves.toEqual({
       user: {
+        displayName: 'User',
         id: 'user-id',
         email: 'user@example.com',
         display_name: 'User',
@@ -108,6 +110,7 @@ describe('UsersController', () => {
       }),
     ).resolves.toEqual({
       user: {
+        displayName: 'User',
         id: 'user-id',
         email: 'user@example.com',
         display_name: 'User',
@@ -143,7 +146,9 @@ describe('UsersController', () => {
       }),
     ).resolves.toEqual({
       status: 'OK',
+      tokenFamily: 'family-id',
       token_family: 'family-id',
+      tokenId: 'token-id',
       token_id: 'token-id',
     })
     expect(refreshTokensRepository.register).toHaveBeenCalledWith({
@@ -174,7 +179,9 @@ describe('UsersController', () => {
       }),
     ).resolves.toEqual({
       status: 'TOKEN_REUSE_DETECTED',
+      tokenFamily: 'family-id',
       token_family: 'family-id',
+      tokenId: 'token-id',
       token_id: 'token-id',
     })
     expect(refreshTokensRepository.rotate).toHaveBeenCalledWith(

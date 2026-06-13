@@ -13,6 +13,7 @@ describe('toUserResponse', () => {
         }),
       ),
     ).toEqual({
+      displayName: 'User',
       id: 'user-id',
       email: 'user@example.com',
       display_name: 'User',

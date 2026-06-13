@@ -21,6 +21,7 @@ export type UserWithPasswordCredential = UserView & {
 }
 
 export type UserResponse = {
+  displayName?: string
   id: string
   email: string
   display_name: string

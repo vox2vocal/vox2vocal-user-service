@@ -154,7 +154,9 @@ export class UsersController {
   private toRefreshTokenResponse(result: { status: string; tokenFamily: string; tokenId: string }) {
     return {
       status: result.status,
+      tokenFamily: result.tokenFamily,
       token_family: result.tokenFamily,
+      tokenId: result.tokenId,
       token_id: result.tokenId,
     }
   }
